@@ -1,4 +1,4 @@
-//  heavily borrowed from 
+//  heavily borrowed from
 // https://learn.adafruit.com/multi-tasking-the-arduino-part-3?view=all#recycling-the-rainbow
 
 #include <Adafruit_NeoPixel.h>
@@ -136,31 +136,35 @@ class NeoPatterns : public Adafruit_NeoPixel
       ActivePattern = SINE_WAVE;
       Interval = interval;
       Direction = dir;
-      TotalSteps = numPixels() / 3;
+      TotalSteps = 12;
       Color1 = color1;
-      Index = 12;
+      Index = 0;
     }
 
     // Update the Scanner Pattern
     void SineWaveUpdate()
     {
-      for (int i = 0; i < TotalSteps; i++)
+      for (int i = 0; i < numPixels(); i++)
       {
-        if (i == Index) // Scan Pixel to the right
-        {
-          setPixelColor(i, Color(155, 155, 155));
-          setPixelColor(i+TotalSteps, Color(155, 155, 155));
-        }
-        else if (i == (Index - 1+TotalSteps)%TotalSteps) // Scan Pixel to the left
-        {
-          setPixelColor(i, Color1);
-          setPixelColor(i+TotalSteps, Color1);
-        }
-        else // Fading tail
-        {
-          setPixelColor(i, DimColor(getPixelColor(i)));
-          setPixelColor(i+TotalSteps, DimColor(getPixelColor(i)));
-        }
+        float sinx = max((sin(2 * PI / numPixels() * (Index + i)) + 1) / 2, 0.1);
+        setPixelColor(i, Color(Red(Color1) * sinx , Green(Color1) * sinx, Blue(Color1) * sinx));
+        //setPixelColor((i)%TotalSteps+TotalSteps , Color(Red(Color1) * sinx , Green(Color1) * sinx, Blue(Color1) * sinx));
+        //
+        //        if (i == Index) // Scan Pixel to the right
+        //        {
+        //          setPixelColor(i, Color(155, 155, 155));
+        //          setPixelColor(i+TotalSteps, Color(155, 155, 155));
+        //        }
+        //        else if (i == (Index - 1+TotalSteps)%TotalSteps) // Scan Pixel to the left
+        //        {
+        //          setPixelColor(i, Color1);
+        //          setPixelColor(i+TotalSteps, Color1);
+        //        }
+        //        else // Fading tail
+        //        {
+        //          setPixelColor(i, DimColor(getPixelColor(i)));
+        //          setPixelColor(i+TotalSteps, DimColor(getPixelColor(i)));
+        //        }
 
       }
       show();
@@ -357,8 +361,9 @@ void setup()
 
   // Kick off a pattern
   //Ring1.Scanner(Ring1.Color(255,255,0), 55);
-  Ring2.SineWave(random(255), 500);
-  //Ring2.Color1 = Ring1.Color1;
+  Ring2.SineWave(Ring2.Color(0, 200, 0), 55, FORWARD);
+  //Ring2.Color2 = Ring2.Wheel(random(255));
+  //Ring2.Color1 = Ring2.Wheel(random(255));
   //Stick.Scanner(Ring1.Color(255,0,0), 55);
 }
 
@@ -373,33 +378,36 @@ void loop()
   if (digitalRead(8) == LOW) // Button #1 pressed
   {
     // Switch Ring1 to FASE pattern
-    Ring1.ActivePattern = FADE;
-    Ring1.Interval = 20;
+//    Ring1.ActivePattern = FADE;
+//    Ring1.Interval = 20;
     // Speed up the rainbow on Ring2
-    Ring2.Interval = 0;
+    Ring2.ActivePattern = RAINBOW_CYCLE;
+    Ring2.TotalSteps=255;
+    Ring2.Interval = 5;
     // Set stick to all red
-    Stick.ColorSet(Stick.Color(255, 0, 0));
+    //Stick.ColorSet(Stick.Color(255, 0, 0));
   }
   else if (digitalRead(9) == LOW) // Button #2 pressed
   {
     // Switch to alternating color wipes on Rings1 and 2
-    Ring1.ActivePattern = COLOR_WIPE;
-    Ring2.ActivePattern = COLOR_WIPE;
-    Ring2.TotalSteps = Ring2.numPixels();
+    //    Ring1.ActivePattern = COLOR_WIPE;
+    //    Ring2.ActivePattern = COLOR_WIPE;
+    //    Ring2.TotalSteps = Ring2.numPixels();
+    //      Ring2.Color1 = Ring2.Wheel(random(255));
     // And update tbe stick
     //Stick.Update();
   }
-  else // Back to normal operation
-  {
-    // Restore all pattern parameters to normal values
-    Ring1.ActivePattern = SCANNER;
-    Ring1.Interval = 100;
-    Ring2.ActivePattern = SINE_WAVE;
-    Ring2.TotalSteps = 6;
-    Ring2.Interval = 100;
-    // And update tbe stick
-    //Stick.Update();
-  }
+    else // Back to normal operation
+    {
+//   Restore all pattern parameters to normal values
+//      Ring1.ActivePattern = SCANNER;
+//      Ring1.Interval = 100;
+  Ring2.ActivePattern = SINE_WAVE;
+  Ring2.TotalSteps = 12;
+  Ring2.Interval = 100;
+  // And update tbe stick
+  //Stick.Update();
+    }
 }
 
 //------------------------------------------------------------
@@ -428,13 +436,16 @@ void Ring2Complete()
   if (digitalRead(9) == LOW)  // Button #2 pressed
   {
     // Alternate color-wipe patterns with Ring1
-    Ring1.Interval = 20;
+    //    Ring1.Interval = 20;
+    //    Ring2.Color1 = Ring2.Wheel(random(255));
+    //    Ring2.Interval = 20000;
+    //      Ring2.Color1 = Ring1.Color(255, 0, 0);
     Ring2.Color1 = Ring2.Wheel(random(255));
-    Ring2.Interval = 20000;
   }
   else  // Retrn to normal
   {
-    Ring2.RainbowCycle(random(0, 10));
+    //Ring2.Color2 = Ring2.Wheel(random(255));
+    //Ring2.Color1 = Ring2.Wheel(random(255));
   }
 }
 
